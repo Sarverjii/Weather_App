@@ -1,10 +1,10 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:weather_app/API%20related%20Stuff/APICALL.dart';
 import 'package:weather_app/API%20related%20Stuff/DataProcessing.dart';
 import 'package:weather_app/widgets/Additional_Info_Container.dart';
 import 'package:weather_app/widgets/Hourly_Forcast_Items.dart';
+import 'package:weather_app/widgets/CitySelectionDialog.dart';
 
 class WeatherScreen extends StatefulWidget {
   WeatherScreen({super.key});
@@ -14,8 +14,10 @@ class WeatherScreen extends StatefulWidget {
 }
 
 class _WeatherScreenState extends State<WeatherScreen> {
-  Dataprocessing dataprocessing = Dataprocessing();
-  APISTUFF apistuff = APISTUFF();
+  String selectedCity = 'Delhi'; // Default city
+  String selectedCountryCode = 'IN'; // Default country code
+
+  late Dataprocessing dataprocessing;
 
   String temp = "";
   String weather = "";
@@ -28,9 +30,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      fetchForeCast();
-    });
+    dataprocessing = Dataprocessing(selectedCity, selectedCountryCode);
+    fetchForeCast();
   }
 
   Future<void> fetchForeCast() async {
@@ -45,7 +46,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
         feelLike = data[3];
         MaxTemp = data[4];
         MinTemp = data[5];
-
         mainIcon = data1;
       });
     } catch (e) {
@@ -53,21 +53,42 @@ class _WeatherScreenState extends State<WeatherScreen> {
     }
   }
 
+  void _showCitySelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CitySelectionDialog(
+          onCitySelected: (city, countryCode) {
+            setState(() {
+              selectedCity = city;
+              dataprocessing = Dataprocessing(selectedCity, countryCode);
+              fetchForeCast(); // Refresh the forecast for the new city
+            });
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Weather App",
-          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5),
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-              onPressed: () {
-                fetchForeCast();
-              },
-              icon: const Icon(Icons.refresh))
+            onPressed: _showCitySelectionDialog,
+            icon: const Icon(Icons.location_city),
+          ),
+          IconButton(
+            onPressed: fetchForeCast,
+            icon: const Icon(Icons.refresh),
+          ),
         ],
       ),
       body: Padding(
@@ -76,7 +97,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //Main Card
+              // Main Card
               Container(
                 width: double.infinity,
                 child: Card(
@@ -90,17 +111,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(children: [
-                          // const SizedBox(
-                          //   height: 16,
-                          // ),
-                          // Text(
-                          //   apistuff.cityName + " , " + apistuff.countryCode,
-                          //   style: const TextStyle(
-                          //       decoration: TextDecoration.underline,
-                          //       fontSize: 25,
-                          //       fontWeight: FontWeight.bold),
-                          // ),
                           const SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            "$selectedCity, $selectedCountryCode",
+                            style: TextStyle(fontSize: 25),
+                          ),
+                          SizedBox(
                             height: 20,
                           ),
                           Row(
@@ -195,14 +213,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 ),
               ),
 
-              //Weather Forcast
-
+              // Weather Forecast
               const SizedBox(
                 height: 20,
               ),
-
               const Text(
-                "Weather Forcast",
+                "Weather Forecast",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -211,7 +227,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
               const SizedBox(
                 height: 8,
               ),
-
               const SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -245,11 +260,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 ),
               ),
 
-              //Addition Information
+              // Additional Information
               const SizedBox(
                 height: 20,
               ),
-
               const Text(
                 "Additional Information",
                 style: TextStyle(
@@ -260,7 +274,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
               const SizedBox(
                 height: 8,
               ),
-
               const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -284,9 +297,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
               const SizedBox(
                 height: 20,
               ),
-
-              const Placeholder(
-                fallbackHeight: 100,
+              // City Choosing
+              const SizedBox(
+                height: 100,
               )
             ],
           ),

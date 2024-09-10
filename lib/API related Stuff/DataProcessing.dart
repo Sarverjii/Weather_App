@@ -3,6 +3,9 @@ import 'package:weather_app/API%20related%20Stuff/APICALL.dart';
 
 class Dataprocessing {
   APISTUFF APIClass = APISTUFF();
+  Dataprocessing(String cityName, String countryCode) {
+    APIClass = APISTUFF(cityName: cityName, countryCode: countryCode);
+  }
 
   Future<List<String>> refresh() async {
     var temp = await fetchTemp();

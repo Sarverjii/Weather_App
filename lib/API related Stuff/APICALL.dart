@@ -3,19 +3,20 @@ import 'package:http/http.dart' as http;
 import 'package:weather_app/API%20related%20Stuff/secrects.dart';
 
 class APISTUFF {
-  // APISTUFF({required this.cityName, required this.countryCode});
+  final String cityName;
+  final String countryCode;
+
+  APISTUFF({this.cityName = "Delhi", this.countryCode = "IN"});
 
   Future getDatafromAPI() async {
     try {
-      String cityName = "Dehradun";
-      String countryCode = "IN";
       final res = await http.get(Uri.parse(
           "https://api.openweathermap.org/data/2.5/forecast?q=$cityName,$countryCode&APPID=$MYAPIID"));
 
       var data = jsonDecode(res.body);
 
-      if (int.parse(data['cod']) != 200) {
-        throw "An unexpected Error Occured";
+      if (data['cod'] != '200') {
+        throw "An unexpected Error Occurred";
       }
 
       return data;
