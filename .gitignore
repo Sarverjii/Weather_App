@@ -46,4 +46,4 @@ app.*.map.json
 
 
 # The file that contains the APIKEY
-lib/secrects.dart
+lib/API related Stuff/secrects.dart
