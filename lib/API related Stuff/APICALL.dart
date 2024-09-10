@@ -3,11 +3,12 @@ import 'package:http/http.dart' as http;
 import 'package:weather_app/API%20related%20Stuff/secrects.dart';
 
 class APISTUFF {
-  String cityName = "Pahalgam";
-  String countryCode = "IN";
+  // APISTUFF({required this.cityName, required this.countryCode});
 
   Future getDatafromAPI() async {
     try {
+      String cityName = "Dehradun";
+      String countryCode = "IN";
       final res = await http.get(Uri.parse(
           "https://api.openweathermap.org/data/2.5/forecast?q=$cityName,$countryCode&APPID=$MYAPIID"));
 
@@ -30,7 +31,6 @@ class APISTUFF {
           (data['list'][0]['main']['temp'] - 273.15).toStringAsFixed(1);
       return value;
     } catch (e) {
-      print("Error: $e");
       throw e;
     }
   }
@@ -42,7 +42,6 @@ class APISTUFF {
 
       return value;
     } catch (e) {
-      print("Error: $e");
       throw e;
     }
   }
@@ -51,11 +50,9 @@ class APISTUFF {
     try {
       var data = await getDatafromAPI();
       String value = data['list'][0]['weather'][0]['description'];
-      print(value);
 
       return value;
     } catch (e) {
-      print("Error: $e");
       throw e;
     }
   }
@@ -65,11 +62,9 @@ class APISTUFF {
       var data = await getDatafromAPI();
       String value =
           (data['list'][0]['main']['feels_like'] - 273.15).toStringAsFixed(1);
-      print(value);
 
       return value;
     } catch (e) {
-      print("Error: $e");
       throw e;
     }
   }
@@ -79,11 +74,9 @@ class APISTUFF {
       var data = await getDatafromAPI();
       String value =
           (data['list'][0]['main']['temp_max'] - 273.15).toStringAsFixed(1);
-      print(value);
 
       return value;
     } catch (e) {
-      print("Error: $e");
       throw e;
     }
   }
@@ -93,11 +86,9 @@ class APISTUFF {
       var data = await getDatafromAPI();
       String value =
           (data['list'][0]['main']['temp_min'] - 273.15).toStringAsFixed(1);
-      print(value);
 
       return value;
     } catch (e) {
-      print("Error: $e");
       throw e;
     }
   }
