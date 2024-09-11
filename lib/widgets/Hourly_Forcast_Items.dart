@@ -3,9 +3,16 @@ import 'package:flutter/material.dart';
 class HourlyForcastItems extends StatelessWidget {
   final String temp;
   final IconData iconn;
+  final String weather;
+  final String weatherdescription;
   final String time;
   const HourlyForcastItems(
-      {super.key, required this.iconn, required this.temp, required this.time});
+      {super.key,
+      required this.iconn,
+      required this.temp,
+      required this.weather,
+      required this.weatherdescription,
+      required this.time});
 
   @override
   Widget build(BuildContext context) {
@@ -14,13 +21,13 @@ class HourlyForcastItems extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(12))),
       elevation: 6,
       child: Container(
-        width: 100,
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 20),
         child: Column(
           children: [
             Text(
               time,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(
               height: 8,
@@ -33,8 +40,15 @@ class HourlyForcastItems extends StatelessWidget {
               height: 8,
             ),
             Text(
-              temp,
-            )
+              weatherdescription,
+              style: TextStyle(fontSize: 12),
+            ),
+            Text(
+              weather,
+              style: TextStyle(fontSize: 15),
+            ),
+            Text(temp,
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))
           ],
         ),
       ),

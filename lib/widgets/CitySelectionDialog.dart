@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:weather_app/cities_list.dart'; // Import the cities list
+import 'package:weather_app/Data_Base/cities_list.dart'; // Import the cities list
 
 class CitySelectionDialog extends StatefulWidget {
   final void Function(String, String) onCitySelected;
