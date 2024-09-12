@@ -1,13 +1,18 @@
+// ignore_for_file: file_names
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:weather_app/API%20related%20Stuff/DataProcessing.dart';
+// import 'package:intl/intl.dart';
+import 'package:weather_app/API%20related%20Stuff/data_processing.dart';
 import 'package:weather_app/widgets/Additional_Info_Container.dart';
-import 'package:weather_app/widgets/Hourly_Forcast_Items.dart';
-import 'package:weather_app/widgets/CitySelectionDialog.dart';
+import 'package:weather_app/widgets/city_selection_dialog.dart';
+import 'package:weather_app/widgets/hourly_forecast_items.dart';
 
 class WeatherScreen extends StatefulWidget {
-  WeatherScreen({super.key});
+  final VoidCallback toggleTheme;
+
+  const WeatherScreen({required this.toggleTheme, super.key});
 
   @override
   State<WeatherScreen> createState() => _WeatherScreenState();
@@ -20,21 +25,19 @@ class _WeatherScreenState extends State<WeatherScreen> {
   late Dataprocessing dataprocessing;
   Future<void>? forecastFuture;
 
-  var forecastCounter = 0;
-
   String temp = "";
   String weather = "";
   String weatherdescription = "";
   String feelLike = "";
-  String MaxTemp = "";
-  String MinTemp = "";
-  String Humidity = "";
-  String Pressure = "";
-  String Wind = "";
+  String maxTemp = "";
+  String minTemp = "";
+  String humidity = "";
+  String pressure = "";
+  String wind = "";
 
   IconData mainIcon = Icons.error_outline;
 
-  var forecastData;
+  Map<String, dynamic> forecastData = <String, dynamic>{};
 
   @override
   void initState() {
@@ -45,7 +48,6 @@ class _WeatherScreenState extends State<WeatherScreen> {
 
   Future<void> fetchForeCast() async {
     try {
-      forecastCounter = 0;
       var data = await dataprocessing.refresh();
       IconData data1 = await dataprocessing.fetchIcon();
       forecastData = await dataprocessing.foreCast();
@@ -55,16 +57,18 @@ class _WeatherScreenState extends State<WeatherScreen> {
         weather = data[2];
         weatherdescription = data[3];
         feelLike = data[4];
-        MaxTemp = data[5];
-        MinTemp = data[6];
-        Humidity = data[7];
-        Pressure = data[8];
-        Wind = data[9];
+        maxTemp = data[5];
+        minTemp = data[6];
+        humidity = data[7];
+        pressure = data[8];
+        wind = data[9];
+
         mainIcon = data1;
       });
     } catch (e) {
       setState(() {
-        print("Error fetching forecast: $e");
+        // ignore: use_rethrow_when_possible
+        throw e;
       });
     }
   }
@@ -77,6 +81,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
           onCitySelected: (city, countryCode) {
             setState(() {
               selectedCity = city;
+
               dataprocessing = Dataprocessing(selectedCity, countryCode);
               forecastFuture = fetchForeCast(); // Update the future
             });
@@ -96,6 +101,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            onPressed: () {
+              widget.toggleTheme();
+              // Call the toggleTheme function to switch themes
+            },
+            icon: const Icon(
+                Icons.brightness_6), // This icon represents theme change
+          ),
           IconButton(
             onPressed: _showCitySelectionDialog,
             icon: const Icon(Icons.location_city),
@@ -123,6 +136,24 @@ class _WeatherScreenState extends State<WeatherScreen> {
               return Center(child: Text(snapshot.error.toString()));
             }
 
+            // Prepare the list of HourlyForcastItems
+            List<Widget> forecastItems = [];
+            for (int i = 0; i < forecastData['list'].length; i++) {
+              forecastItems.add(
+                HourlyForcastItems(
+                  iconn: dataprocessing.iconWeatherForcast(
+                      forecastData['list'][i]['weather'][0]['main']),
+                  weatherdescription: forecastData['list'][i]['weather'][0]
+                      ['description'],
+                  temp: (forecastData['list'][i]['main']['temp'] - 273.15)
+                      .toStringAsFixed(1),
+                  weather: forecastData['list'][i]['weather'][0]['main'],
+                  time: dataprocessing
+                      .formatDateTime(forecastData['list'][i]['dt_txt']),
+                ),
+              );
+            }
+
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SingleChildScrollView(
@@ -130,7 +161,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Main Card
-                    Container(
+                    SizedBox(
                       width: double.infinity,
                       child: Card(
                         shape: const RoundedRectangleBorder(
@@ -148,6 +179,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                 const SizedBox(
                                   height: 20,
                                 ),
+                                // Text(
+                                //     style: const TextStyle(fontSize: 20),
+                                //     DateFormat('dd-MM-yy HH:mm')
+                                //         .format(
+                                //             dataprocessing.getLatestDateTime!)
+                                //         .toString()),
                                 Text(
                                   "$selectedCity, $selectedCountryCode",
                                   style: const TextStyle(fontSize: 25),
@@ -217,7 +254,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                             textAlign: TextAlign.center,
                                           ),
                                           Text(
-                                            MaxTemp,
+                                            maxTemp,
                                             style: const TextStyle(
                                                 fontSize: 20,
                                                 fontWeight: FontWeight.w800),
@@ -233,7 +270,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                             textAlign: TextAlign.center,
                                           ),
                                           Text(
-                                            MinTemp,
+                                            minTemp,
                                             style: const TextStyle(
                                                 fontSize: 20,
                                                 fontWeight: FontWeight.w800),
@@ -265,168 +302,27 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
-                        children: [
-                          HourlyForcastItems(
-                            iconn: dataprocessing.iconWeatherForcast(
-                                forecastData['list'][forecastCounter]['weather']
-                                    [0]['main']),
-                            weatherdescription: forecastData['list']
-                                [forecastCounter]['weather'][0]['description'],
-                            temp: (forecastData['list'][forecastCounter]['main']
-                                        ['temp'] -
-                                    273.15)
-                                .toStringAsFixed(1),
-                            weather: forecastData['list'][forecastCounter]
-                                ['weather'][0]['main'],
-                            time: dataprocessing.formatDateTime(
-                                forecastData['list'][forecastCounter++]
-                                    ['dt_txt']),
-                          ),
-                          HourlyForcastItems(
-                            iconn: dataprocessing.iconWeatherForcast(
-                                forecastData['list'][forecastCounter]['weather']
-                                    [0]['main']),
-                            weatherdescription: forecastData['list']
-                                [forecastCounter]['weather'][0]['description'],
-                            temp: (forecastData['list'][forecastCounter]['main']
-                                        ['temp'] -
-                                    273.15)
-                                .toStringAsFixed(1),
-                            weather: forecastData['list'][forecastCounter]
-                                ['weather'][0]['main'],
-                            time: dataprocessing.formatDateTime(
-                                forecastData['list'][forecastCounter++]
-                                    ['dt_txt']),
-                          ),
-                          HourlyForcastItems(
-                            iconn: dataprocessing.iconWeatherForcast(
-                                forecastData['list'][forecastCounter]['weather']
-                                    [0]['main']),
-                            weatherdescription: forecastData['list']
-                                [forecastCounter]['weather'][0]['description'],
-                            temp: (forecastData['list'][forecastCounter]['main']
-                                        ['temp'] -
-                                    273.15)
-                                .toStringAsFixed(1),
-                            weather: forecastData['list'][forecastCounter]
-                                ['weather'][0]['main'],
-                            time: dataprocessing.formatDateTime(
-                                forecastData['list'][forecastCounter++]
-                                    ['dt_txt']),
-                          ),
-                          HourlyForcastItems(
-                            iconn: dataprocessing.iconWeatherForcast(
-                                forecastData['list'][forecastCounter]['weather']
-                                    [0]['main']),
-                            weatherdescription: forecastData['list']
-                                [forecastCounter]['weather'][0]['description'],
-                            temp: (forecastData['list'][forecastCounter]['main']
-                                        ['temp'] -
-                                    273.15)
-                                .toStringAsFixed(1),
-                            weather: forecastData['list'][forecastCounter]
-                                ['weather'][0]['main'],
-                            time: dataprocessing.formatDateTime(
-                                forecastData['list'][forecastCounter++]
-                                    ['dt_txt']),
-                          ),
-                          HourlyForcastItems(
-                            iconn: dataprocessing.iconWeatherForcast(
-                                forecastData['list'][forecastCounter]['weather']
-                                    [0]['main']),
-                            weatherdescription: forecastData['list']
-                                [forecastCounter]['weather'][0]['description'],
-                            temp: (forecastData['list'][forecastCounter]['main']
-                                        ['temp'] -
-                                    273.15)
-                                .toStringAsFixed(1),
-                            weather: forecastData['list'][forecastCounter]
-                                ['weather'][0]['main'],
-                            time: dataprocessing.formatDateTime(
-                                forecastData['list'][forecastCounter++]
-                                    ['dt_txt']),
-                          ),
-                          HourlyForcastItems(
-                            iconn: dataprocessing.iconWeatherForcast(
-                                forecastData['list'][forecastCounter]['weather']
-                                    [0]['main']),
-                            weatherdescription: forecastData['list']
-                                [forecastCounter]['weather'][0]['description'],
-                            temp: (forecastData['list'][forecastCounter]['main']
-                                        ['temp'] -
-                                    273.15)
-                                .toStringAsFixed(1),
-                            weather: forecastData['list'][forecastCounter]
-                                ['weather'][0]['main'],
-                            time: dataprocessing.formatDateTime(
-                                forecastData['list'][forecastCounter++]
-                                    ['dt_txt']),
-                          ),
-                          HourlyForcastItems(
-                            iconn: dataprocessing.iconWeatherForcast(
-                                forecastData['list'][forecastCounter]['weather']
-                                    [0]['main']),
-                            weatherdescription: forecastData['list']
-                                [forecastCounter]['weather'][0]['description'],
-                            temp: (forecastData['list'][forecastCounter]['main']
-                                        ['temp'] -
-                                    273.15)
-                                .toStringAsFixed(1),
-                            weather: forecastData['list'][forecastCounter]
-                                ['weather'][0]['main'],
-                            time: dataprocessing.formatDateTime(
-                                forecastData['list'][forecastCounter++]
-                                    ['dt_txt']),
-                          ),
-                          HourlyForcastItems(
-                            iconn: dataprocessing.iconWeatherForcast(
-                                forecastData['list'][forecastCounter]['weather']
-                                    [0]['main']),
-                            weatherdescription: forecastData['list']
-                                [forecastCounter]['weather'][0]['description'],
-                            temp: (forecastData['list'][forecastCounter]['main']
-                                        ['temp'] -
-                                    273.15)
-                                .toStringAsFixed(1),
-                            weather: forecastData['list'][forecastCounter]
-                                ['weather'][0]['main'],
-                            time: dataprocessing.formatDateTime(
-                                forecastData['list'][forecastCounter++]
-                                    ['dt_txt']),
-                          ),
-                          HourlyForcastItems(
-                            iconn: dataprocessing.iconWeatherForcast(
-                                forecastData['list'][forecastCounter]['weather']
-                                    [0]['main']),
-                            weatherdescription: forecastData['list']
-                                [forecastCounter]['weather'][0]['description'],
-                            temp: (forecastData['list'][forecastCounter]['main']
-                                        ['temp'] -
-                                    273.15)
-                                .toStringAsFixed(1),
-                            weather: forecastData['list'][forecastCounter]
-                                ['weather'][0]['main'],
-                            time: dataprocessing.formatDateTime(
-                                forecastData['list'][forecastCounter++]
-                                    ['dt_txt']),
-                          ),
-                          HourlyForcastItems(
-                            iconn: dataprocessing.iconWeatherForcast(
-                                forecastData['list'][forecastCounter]['weather']
-                                    [0]['main']),
-                            weatherdescription: forecastData['list']
-                                [forecastCounter]['weather'][0]['description'],
-                            temp: (forecastData['list'][forecastCounter]['main']
-                                        ['temp'] -
-                                    273.15)
-                                .toStringAsFixed(1),
-                            weather: forecastData['list'][forecastCounter]
-                                ['weather'][0]['main'],
-                            time: dataprocessing.formatDateTime(
-                                forecastData['list'][forecastCounter++]
-                                    ['dt_txt']),
-                          ),
-                        ],
+                        children: forecastItems,
+                        // children: [
+                        //   HourlyForcastItems(
+                        //     iconn: dataprocessing.iconWeatherForcast(
+                        //         forecastData['list'][forecastCounter]['weather']
+                        //             [0]['main']),
+                        //     weatherdescription: forecastData['list']
+                        //         [forecastCounter]['weather'][0]['description'],
+                        //     temp: (forecastData['list'][forecastCounter]['main']
+                        //                 ['temp'] -
+                        //             273.15)
+                        //         .toStringAsFixed(1),
+                        //     weather: forecastData['list'][forecastCounter]
+                        //         ['weather'][0]['main'],
+                        //     time: dataprocessing.formatDateTime(
+                        //         forecastData['list'][forecastCounter++]
+                        //             ['dt_txt']),
+                        //   ),
+
+                        //   // Repeat HourlyForcastItems as needed
+                        // ],
                       ),
                     ),
 
@@ -449,18 +345,18 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       children: [
                         AdditionalInfoContainer(
                           iconn: Icons.water_drop,
-                          heading: "Humidity",
-                          value: Humidity,
+                          heading: "humidity",
+                          value: humidity,
                         ),
                         AdditionalInfoContainer(
                           iconn: Icons.air,
-                          heading: "Wind",
-                          value: Wind,
+                          heading: "wind",
+                          value: wind,
                         ),
                         AdditionalInfoContainer(
                           iconn: Icons.beach_access,
-                          heading: "Pressure",
-                          value: Pressure,
+                          heading: "pressure",
+                          value: pressure,
                         ),
                       ],
                     ),

@@ -13,7 +13,7 @@ class AdditionalInfoContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 100,
       child: Column(
         children: [
@@ -26,14 +26,14 @@ class AdditionalInfoContainer extends StatelessWidget {
           ),
           Text(
             heading,
-            style: TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 16),
           ),
           const SizedBox(
             height: 10,
           ),
           Text(
             value,
-            style: TextStyle(fontSize: 20),
+            style: const TextStyle(fontSize: 20),
           )
         ],
       ),

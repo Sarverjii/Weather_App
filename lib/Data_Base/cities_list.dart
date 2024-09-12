@@ -126,6 +126,8 @@ final List<Map<String, String>> citiesList = [
   {'city': 'Tuticorin', 'countryCode': 'IN'},
   {'city': 'Udhampur', 'countryCode': 'IN'},
   {'city': 'Yamunanagar', 'countryCode': 'IN'},
+  {'city': 'Lucknow', 'countryCode': 'IN'},
+
   // Additional unique cities
   {'city': 'Faridabad', 'countryCode': 'IN'},
   {'city': 'Jammu', 'countryCode': 'IN'},
