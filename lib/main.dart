@@ -14,6 +14,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _isDarkTheme = false;
+
   void _toggleTheme() {
     setState(() {
       _isDarkTheme = !_isDarkTheme;
@@ -26,8 +27,9 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       theme: _isDarkTheme
           ? ThemeData.dark(useMaterial3: true)
-          : ThemeData.light(useMaterial3: true)
-              .copyWith(iconTheme: const IconThemeData(color: Colors.black54)),
+          : ThemeData.light(useMaterial3: true).copyWith(
+              iconTheme: const IconThemeData(color: Colors.black54),
+            ),
       debugShowCheckedModeBanner: false,
       home: WeatherScreen(toggleTheme: _toggleTheme),
     );

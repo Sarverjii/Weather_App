@@ -187,7 +187,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                 //         .toString()),
                                 Text(
                                   "$selectedCity, $selectedCountryCode",
-                                  style: const TextStyle(fontSize: 25),
+                                  style: const TextStyle(
+                                    fontSize: 25,
+                                  ),
                                 ),
                                 const SizedBox(
                                   height: 20,
@@ -218,13 +220,13 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                             weatherdescription,
                                             style: const TextStyle(
                                                 fontSize: 15,
-                                                fontWeight: FontWeight.w300),
+                                                fontWeight: FontWeight.bold),
                                           ),
                                           Text(
                                             weather,
                                             style: const TextStyle(
                                                 fontSize: 20,
-                                                fontWeight: FontWeight.w300),
+                                                fontWeight: FontWeight.bold),
                                           ),
                                         ],
                                       ),
